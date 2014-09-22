@@ -4,6 +4,7 @@ var app = express();
 
 var fs = require('fs');
 
+var mkdirp = require('mkdirp');
 
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
@@ -21,50 +22,48 @@ app.get('/', function(req, res){
     );
 });
 
-app.post('/upload', multipartMiddleware, function(req, res) {
+app.post('/upload/:sid/:username', multipartMiddleware, function(req, res) {
     console.log(req.body, req.files);
     // don't forget to delete all req.files when done
+    console.log(req.params.sid, req.params.username);
 
-
-
-    var uploadDir = __dirname+"/uploads/";
+    var uploadDir = __dirname+"/uploads/" + req.params.sid + "/" + req.params.username + "/";
     var fileName = req.files.source.name;
 
-    fs.rename(
-        req.files.source.path,
-            uploadDir+fileName,
-        function(err){
-            if(err != null){
-                console.log(err)
-                res.send(400, "Server Writting No Good");
-            } else {
-                res.send("ok!");
-            }
+    console.log(uploadDir);
+
+    mkdirp(__dirname+"/uploads/" + req.params.sid + "/", function (err) {
+        if (err){
+            console.error(err)
+            res.send(400, "Server Writting No Good");
         }
-    );
+        else{
+            mkdirp(uploadDir, function (err) {
+                if (err){
+                    console.error(err)
+                    res.send(400, "Server Writting No Good");
+                }
+                else{
+                    fs.rename(
+                        req.files.source.path,
+                            uploadDir+fileName,
+                        function(err){
+                            if(err != null){
+                                console.log(err)
+                                res.send(400, "Server Writting No Good");
+                            } else {
+                                res.send("ok!");
+                            }
+                        }
+                    );
+                }
+            });
+        }
+    });
+
+
 });
 
-/*
-app.post('/upload', function(req, res){
-    console.log("Received file:\n" + JSON.stringify(req.files));
-
-    var uploadDir = __dirname+"/uploads/";
-    var fileName = req.files.source.name;
-
-    fs.rename(
-        req.files.source.path,
-            uploadDir+fileName,
-        function(err){
-            if(err != null){
-                console.log(err)
-                res.send(400, "Server Writting No Good");
-            } else {
-               res.send("ok!");
-            }
-        }
-    );
-});
-*/
 app.get('/info', function(req, res){
     console.log(__dirname);
     res.send("ok");
