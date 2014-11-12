@@ -15,7 +15,7 @@ app.use(multipartMiddleware);
 app.get('/', function(req, res){
     console.log("called /");
     res.send(
-            '<form action="/upload" method="post" enctype="multipart/form-data">'+
+            '<form action="/upload/test/000" method="post" enctype="multipart/form-data">'+
             '<input type="file" name="source">'+
             '<input type="submit" value="Upload">'+
             '</form>'
@@ -27,12 +27,12 @@ app.post('/upload/:sid/:username', multipartMiddleware, function(req, res) {
     // don't forget to delete all req.files when done
     console.log(req.params.sid, req.params.username);
 
-    var uploadDir = __dirname+"/uploads/" + req.params.sid + "/" + req.params.username + "/";
+    var uploadDir = "/home/martin/www/uploads/" + req.params.username + "/" + req.params.sid + "/";
     var fileName = req.files.source.name;
 
     console.log(uploadDir);
 
-    mkdirp(__dirname+"/uploads/" + req.params.sid + "/", function (err) {
+    mkdirp("/home/martin/www/uploads/" + req.params.username + "/", function (err) {
         if (err){
             console.error(err)
             res.send(400, "Server Writting No Good");
